@@ -1,4 +1,4 @@
-![GitHub Actions]()
+![GitHub Actions](https://github.com/pixitha/pdf-collapse/actions/workflows/release.yml/badge.svg)
 [![codebeat badge](https://codebeat.co/badges/08fbf431-5254-492c-82e1-e2007cc83573)](https://codebeat.co/projects/github-com-pixitha-pdf-collapse-master)
 [![Buy me a coffee](https://img.shields.io/static/v1?label=&message=Buy%20me%20a%20coffee&logo=buy-me-a-coffee&color=fade25&logoColor=grey)](https://buymeacoffee.com/pixitha)
 
