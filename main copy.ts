@@ -1,17 +1,17 @@
 import { App, Plugin, PluginSettingTab, Setting, MarkdownView } from 'obsidian';
 
 // Plugin settings interface
-interface PDFCollapseSettings {
+interface MyPluginSettings {
     hidePDFPreviews: boolean;
 }
 
 // Default settings
-const DEFAULT_SETTINGS: PDFCollapseSettings = {
+const DEFAULT_SETTINGS: MyPluginSettings = {
     hidePDFPreviews: false,
 };
 
-export default class PDFCollapsePlugin extends Plugin {
-    settings: PDFCollapseSettings;
+export default class MyPlugin extends Plugin {
+    settings: MyPluginSettings;
     private observer: MutationObserver | null = null;
 
     async onload() {
@@ -78,13 +78,11 @@ export default class PDFCollapsePlugin extends Plugin {
                 const contentEl = view.contentEl;
 
                 // Hide all currently rendered PDF previews in editor view
-                const pdfPreviewsEditorView = contentEl.querySelectorAll('div.internal-embed.pdf-embed.is-loaded');
+                const pdfPreviewsEditorView = contentEl.querySelectorAll('div.textLayer');
                 pdfPreviewsEditorView.forEach((preview) => {
                     if (preview instanceof HTMLElement) {
                         console.log('Hiding PDF preview in editor view:', preview);
                         preview.style.display = 'none';
-                    } else {
-                        console.log('Editor view PDF preview not found:', preview);
                     }
                 });
 
@@ -94,8 +92,6 @@ export default class PDFCollapsePlugin extends Plugin {
                     if (preview instanceof HTMLElement) {
                         console.log('Hiding PDF preview in reading view:', preview);
                         preview.style.display = 'none';
-                    } else {
-                        console.log('Reading view PDF preview not found:', preview);
                     }
                 });
             }
@@ -111,13 +107,11 @@ export default class PDFCollapsePlugin extends Plugin {
                 const contentEl = view.contentEl;
 
                 // Show all currently hidden PDF previews in editor view
-                const pdfPreviewsEditorView = contentEl.querySelectorAll('div.internal-embed.pdf-embed.is-loaded');
+                const pdfPreviewsEditorView = contentEl.querySelectorAll('div.textLayer');
                 pdfPreviewsEditorView.forEach((preview) => {
                     if (preview instanceof HTMLElement) {
                         console.log('Showing PDF preview in editor view:', preview);
                         preview.style.display = '';
-                    } else {
-                        console.log('Editor view PDF preview not found:', preview);
                     }
                 });
 
@@ -127,8 +121,6 @@ export default class PDFCollapsePlugin extends Plugin {
                     if (preview instanceof HTMLElement) {
                         console.log('Showing PDF preview in reading view:', preview);
                         preview.style.display = '';
-                    } else {
-                        console.log('Reading view PDF preview not found:', preview);
                     }
                 });
             }
@@ -138,13 +130,11 @@ export default class PDFCollapsePlugin extends Plugin {
     hideNewPDFPreviews(nodes: NodeList) {
         nodes.forEach((node) => {
             if (node instanceof HTMLElement) {
-                const pdfPreviews = node.querySelectorAll('div.internal-embed.pdf-embed.is-loaded, span.pdf-embed');
+                const pdfPreviews = node.querySelectorAll('div.textLayer, span.pdf-embed');
                 pdfPreviews.forEach((preview) => {
                     if (preview instanceof HTMLElement) {
                         console.log('Hiding new PDF preview:', preview);
                         preview.style.display = 'none';
-                    } else {
-                        console.log('New PDF preview not found:', preview);
                     }
                 });
             }
