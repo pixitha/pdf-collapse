@@ -5,7 +5,9 @@
 	"minAppVersion": "0.15.0",
 	"description": "Allows hiding previews of PDFs in reading and editing view.",
 	"author": "Kyle Duren",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"authorUrl": "https://pixitha.com",
+	"fundingUrl": {
+		"Buy me a Coffee": "https://buymeacoffee.com/pixitha"
+	},
 	"isDesktopOnly": false
 }
