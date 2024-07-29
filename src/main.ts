@@ -1,41 +1,51 @@
 import { App, Plugin, PluginSettingTab, Setting, MarkdownView } from 'obsidian';
 
-// Plugin settings interface
-interface MyPluginSettings {
+interface PDFCollapseSettings {
     hidePDFPreviews: boolean;
 }
 
-// Default settings
-const DEFAULT_SETTINGS: MyPluginSettings = {
+const DEFAULT_SETTINGS: PDFCollapseSettings = {
     hidePDFPreviews: false,
 };
 
-export default class MyPlugin extends Plugin {
-    settings: MyPluginSettings;
+export default class PDFCollapsePlugin extends Plugin {
+    settings: PDFCollapseSettings;
     private observer: MutationObserver | null = null;
+    private ribbonIconEl: HTMLElement | null = null;
 
     async onload() {
         console.log('Loading plugin');
-
-        // Load settings
         await this.loadSettings();
 
-        // Add a command to toggle PDF preview hiding
         this.addCommand({
             id: 'toggle-hide-pdf-previews',
             name: 'Toggle Hide PDF Previews',
             callback: () => this.toggleHidePDFPreviews()
         });
 
-        // Add a button to the ribbon
-        this.addRibbonIcon('eye-off', 'Toggle Hide PDF Previews', () => this.toggleHidePDFPreviews());
-
-        // Initialize the Mutation Observer
         this.initMutationObserver();
 
-        // Initially hide or show PDFs based on the current setting
         if (this.settings.hidePDFPreviews) {
             this.hideAllPDFPreviews();
+        }
+
+        this.addOrUpdateRibbonIcon();
+    }
+
+    addOrUpdateRibbonIcon() {
+        if (!this.ribbonIconEl) {
+            this.ribbonIconEl = this.addRibbonIcon(
+                this.settings.hidePDFPreviews ? 'eye-off' : 'eye',
+                this.settings.hidePDFPreviews ? 'Show PDF Previews' : 'Hide PDF Previews',
+                () => this.toggleHidePDFPreviews()
+            );
+        } else {
+            const iconClass = this.settings.hidePDFPreviews ? 'eye-off' : 'eye';
+            const iconTitle = this.settings.hidePDFPreviews ? 'Show PDF Previews' : 'Hide PDF Previews';
+            
+            this.ribbonIconEl.setAttr('title', iconTitle);
+            this.ribbonIconEl.empty();
+            this.ribbonIconEl.createSpan({ cls: 'icon', attr: { 'aria-hidden': 'true' } }).addClass(iconClass);
         }
     }
 
@@ -51,7 +61,6 @@ export default class MyPlugin extends Plugin {
             }
         });
 
-        // Observe the entire document for added nodes
         this.observer.observe(document.body, { childList: true, subtree: true });
         console.log('Mutation observer initialized.');
     }
@@ -67,31 +76,34 @@ export default class MyPlugin extends Plugin {
             console.log('Showing all PDF previews...');
             this.showAllPDFPreviews();
         }
+
+        this.addOrUpdateRibbonIcon();
     }
 
     async hideAllPDFPreviews() {
         console.log('Attempting to hide all PDF previews...');
-        // Get all Markdown views
         const markdownViews = this.app.workspace.getLeavesOfType('markdown').map(leaf => leaf.view);
         markdownViews.forEach((view) => {
             if (view instanceof MarkdownView) {
                 const contentEl = view.contentEl;
 
-                // Hide all currently rendered PDF previews in editor view
-                const pdfPreviewsEditorView = contentEl.querySelectorAll('div.textLayer');
+                const pdfPreviewsEditorView = contentEl.querySelectorAll('div.internal-embed.pdf-embed.is-loaded');
                 pdfPreviewsEditorView.forEach((preview) => {
                     if (preview instanceof HTMLElement) {
                         console.log('Hiding PDF preview in editor view:', preview);
                         preview.style.display = 'none';
+                    } else {
+                        console.log('Editor view PDF preview not found:', preview);
                     }
                 });
 
-                // Hide all currently rendered PDF previews in reading view
                 const pdfPreviewsReadingView = contentEl.querySelectorAll('span.pdf-embed');
                 pdfPreviewsReadingView.forEach((preview) => {
                     if (preview instanceof HTMLElement) {
                         console.log('Hiding PDF preview in reading view:', preview);
                         preview.style.display = 'none';
+                    } else {
+                        console.log('Reading view PDF preview not found:', preview);
                     }
                 });
             }
@@ -100,27 +112,28 @@ export default class MyPlugin extends Plugin {
 
     async showAllPDFPreviews() {
         console.log('Attempting to show all PDF previews...');
-        // Get all Markdown views
         const markdownViews = this.app.workspace.getLeavesOfType('markdown').map(leaf => leaf.view);
         markdownViews.forEach((view) => {
             if (view instanceof MarkdownView) {
                 const contentEl = view.contentEl;
 
-                // Show all currently hidden PDF previews in editor view
-                const pdfPreviewsEditorView = contentEl.querySelectorAll('div.textLayer');
+                const pdfPreviewsEditorView = contentEl.querySelectorAll('div.internal-embed.pdf-embed.is-loaded');
                 pdfPreviewsEditorView.forEach((preview) => {
                     if (preview instanceof HTMLElement) {
                         console.log('Showing PDF preview in editor view:', preview);
                         preview.style.display = '';
+                    } else {
+                        console.log('Editor view PDF preview not found:', preview);
                     }
                 });
 
-                // Show all currently hidden PDF previews in reading view
                 const pdfPreviewsReadingView = contentEl.querySelectorAll('span.pdf-embed');
                 pdfPreviewsReadingView.forEach((preview) => {
                     if (preview instanceof HTMLElement) {
                         console.log('Showing PDF preview in reading view:', preview);
                         preview.style.display = '';
+                    } else {
+                        console.log('Reading view PDF preview not found:', preview);
                     }
                 });
             }
@@ -130,11 +143,13 @@ export default class MyPlugin extends Plugin {
     hideNewPDFPreviews(nodes: NodeList) {
         nodes.forEach((node) => {
             if (node instanceof HTMLElement) {
-                const pdfPreviews = node.querySelectorAll('div.textLayer, span.pdf-embed');
+                const pdfPreviews = node.querySelectorAll('div.internal-embed.pdf-embed.is-loaded, span.pdf-embed');
                 pdfPreviews.forEach((preview) => {
                     if (preview instanceof HTMLElement) {
                         console.log('Hiding new PDF preview:', preview);
                         preview.style.display = 'none';
+                    } else {
+                        console.log('New PDF preview not found:', preview);
                     }
                 });
             }
